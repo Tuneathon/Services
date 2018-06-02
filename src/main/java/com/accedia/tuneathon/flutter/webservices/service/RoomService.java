@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class RoomService {
@@ -21,7 +22,6 @@ public class RoomService {
 
     @Autowired
     private UserRepository userRepository;
-
 
 
     public List<RoomDTO> getOpenedRooms() {
@@ -34,21 +34,46 @@ public class RoomService {
         return roomsDto;
     }
 
-    public long createRoom(RoomDTO roomDTO) {
+    public long createRoom(RoomDTO roomDTO, long userId) {
         Room room = new Room();
+        Optional<User> userOpt = this.userRepository.findById(userId);
+        if (!userOpt.isPresent()) {
+            throw new IllegalArgumentException("The user doesn't exist!");
+        }
+        User user = userOpt.get();
+        room.setHostName(user.getName());
         room.setMaxPeople(roomDTO.getMaxPeople());
-        room.setHostName(roomDTO.getHostName());
         room.setName(roomDTO.getName());
         room.setCurrentPeople(1);
         room.setStatus(RoomStatus.OPEN);
         this.roomRepository.save(room);
 
-        User user = new User();
-        user.setName(room.getHostName());
         user.setRoom(room);
         this.userRepository.save(user);
 
         return room.getId();
     }
 
+    public void joinRoom(long roomId, long userId) {
+        Optional<Room> roomOpt = this.roomRepository.findById(roomId);
+        if (!roomOpt.isPresent()) {
+            throw new IllegalArgumentException("The room doesn't exist or is deleted by the host!");
+        }
+        Room room = roomOpt.get();
+        if (room.getStatus().equals(RoomStatus.CLOSED)) {
+            throw new IllegalArgumentException("The room is full!");
+        }
+        Optional<User> userOpt = this.userRepository.findById(userId);
+        if (!userOpt.isPresent()) {
+            throw new IllegalArgumentException("The user doesn't exist!");
+        }
+        User user = userOpt.get();
+        user.setRoom(room);
+        room.setCurrentPeople(room.getCurrentPeople() + 1);
+        if (room.getMaxPeople() == room.getCurrentPeople()) {
+            room.setStatus(RoomStatus.CLOSED);
+        }
+        this.roomRepository.save(room);
+        this.userRepository.save(user);
+    }
 }
