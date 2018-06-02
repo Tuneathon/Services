@@ -1,5 +1,6 @@
 package com.accedia.tuneathon.flutter.webservices.controller;
 
+import com.accedia.tuneathon.flutter.webservices.Util.Cache;
 import com.accedia.tuneathon.flutter.webservices.dto.RoomDTO;
 import com.accedia.tuneathon.flutter.webservices.entity.Room;
 import com.accedia.tuneathon.flutter.webservices.service.RoomService;
@@ -34,7 +35,7 @@ public class RoomController {
     }
 
     @RequestMapping(value = "/join", method = RequestMethod.POST)
-    public ResponseEntity<IllegalStateException> joinRoom(@RequestParam long roomId, @RequestParam long userId) {
+    public ResponseEntity<RoomDTO> joinRoom(@RequestParam long roomId, @RequestParam long userId) {
         roomService.joinRoom(roomId, userId);
         return new ResponseEntity<>(HttpStatus.OK);
     }

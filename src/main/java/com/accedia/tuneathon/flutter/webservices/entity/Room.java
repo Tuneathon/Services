@@ -8,8 +8,6 @@ import java.util.List;
 @Entity
 public class Room {
 
-    public Room(){}
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
@@ -35,6 +33,8 @@ public class Room {
 
     @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
     private List<User> userList;
+
+    public Room(){}
 
     public long getId() {
         return id;

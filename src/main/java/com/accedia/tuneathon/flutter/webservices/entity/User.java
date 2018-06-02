@@ -5,8 +5,6 @@ import javax.persistence.*;
 @Entity
 public class User {
 
-    public User() {}
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
@@ -17,6 +15,8 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "room_id")
     private Room room;
+
+    public User() {}
 
     public long getId() {
         return id;

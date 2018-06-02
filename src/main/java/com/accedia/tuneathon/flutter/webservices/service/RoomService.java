@@ -1,16 +1,20 @@
 package com.accedia.tuneathon.flutter.webservices.service;
 
-import com.accedia.tuneathon.flutter.webservices.Converter;
+import com.accedia.tuneathon.flutter.webservices.Util.Cache;
+import com.accedia.tuneathon.flutter.webservices.Util.Converter;
 import com.accedia.tuneathon.flutter.webservices.Util.RoomStatus;
 import com.accedia.tuneathon.flutter.webservices.dto.RoomDTO;
+import com.accedia.tuneathon.flutter.webservices.entity.Question;
 import com.accedia.tuneathon.flutter.webservices.entity.Room;
 import com.accedia.tuneathon.flutter.webservices.entity.User;
+import com.accedia.tuneathon.flutter.webservices.repository.QuestionRepository;
 import com.accedia.tuneathon.flutter.webservices.repository.RoomRepository;
 import com.accedia.tuneathon.flutter.webservices.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,6 +27,8 @@ public class RoomService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private QuestionRepository questionRepository;
 
     public List<RoomDTO> getOpenedRooms() {
         List<Room> rooms = this.roomRepository.findByStatus(RoomStatus.OPEN);
@@ -50,6 +56,8 @@ public class RoomService {
 
         user.setRoom(room);
         this.userRepository.save(user);
+
+        Cache.getRoomsQuestions().put(room.getId(), this.questionRepository.getRandomQuestions());
 
         return room.getId();
     }

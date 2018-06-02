@@ -1,10 +1,13 @@
 package com.accedia.tuneathon.flutter.webservices.service;
 
+import com.accedia.tuneathon.flutter.webservices.Util.Cache;
 import com.accedia.tuneathon.flutter.webservices.Util.RoomStatus;
 import com.accedia.tuneathon.flutter.webservices.dto.SocketRequest;
 import com.accedia.tuneathon.flutter.webservices.dto.SocketResponse;
+import com.accedia.tuneathon.flutter.webservices.entity.Question;
 import com.accedia.tuneathon.flutter.webservices.entity.Room;
 import com.accedia.tuneathon.flutter.webservices.entity.User;
+import com.accedia.tuneathon.flutter.webservices.repository.QuestionRepository;
 import com.accedia.tuneathon.flutter.webservices.repository.RoomRepository;
 import com.accedia.tuneathon.flutter.webservices.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,26 +28,37 @@ public class TriviaService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private QuestionRepository questionRepository;
 
     public void onMessage(long roomId, long userId, SocketRequest request) {
 
-        System.out.println("MESSAGE IS --   " + request.getAnswer() + "             ROOM ID " + roomId);
+        System.out.println("roomId: " + roomId);
+        System.out.println("request getQuestionId: " + request.getQuestionId());
+        System.out.println("request answer: " + request.getAnswer());
+        System.out.println("request isJoinReq: " + request.isJoinReq());
         if (request.isJoinReq()) {
             Optional<User> userOpt = userRepository.findById(userId);
+            if (!userOpt.isPresent()) {
+                throw new IllegalArgumentException("The user doesn't exist!");
+            }
             SocketResponse response = new SocketResponse();
             response.setMessage("User " + userOpt.get().getName() + " has joined the room !");
             template.convertAndSend("/topic/"+roomId, response);
         }
 
-
-        Room room = this.roomRepository.findById(roomId).get();
-
+        Optional<Room> roomOpt = this.roomRepository.findById(roomId);
+        if (!roomOpt.isPresent()) {
+            throw new IllegalArgumentException("The room doesn't exist!");
+        }
+        Room room = roomOpt.get();
 
         if (room.getStatus().equals(RoomStatus.CLOSED)) {
             SocketResponse response = new SocketResponse();
-            response.setQuestion("Ima li vladi visok holesterol ?");
-            response.setQuestionId(1);
-            template.convertAndSend("/topic/"+roomId, response);
+            Question question = Cache.getRoomsQuestions().get(room.getId()).get(room.getRound());
+            response.setQuestion(question.getQuestion());
+            response.setQuestionId(question.getId());
+            template.convertAndSend("/topic/" + roomId, response);
 
 //            template.convertAndSend("/topic/" + roomId, request.getAnswer());
 //            Question question = null;
@@ -52,7 +66,5 @@ public class TriviaService {
 //                template.convertAndSend("/topic/" + roomId, question);
 //            }
         }
-
     }
-
 }
