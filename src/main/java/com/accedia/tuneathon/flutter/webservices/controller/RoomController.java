@@ -21,18 +21,13 @@ public class RoomController {
         this.roomService = roomService;
     }
 
-    @GetMapping("/test")
-    public String test() {
-    	return "BRAVO !!";
-    }
-
-    @RequestMapping(method = RequestMethod.GET)
+    @RequestMapping(value = "/getOpened", method = RequestMethod.GET)
     public ResponseEntity<List<RoomDTO>> getOpenedRooms() {
         List<RoomDTO> allRooms = roomService.getOpenedRooms();
         return new ResponseEntity<>(allRooms, HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.POST)
+    @RequestMapping(value = "/create", method = RequestMethod.POST)
     public ResponseEntity<Long> createRoom(@RequestBody RoomDTO roomDTO) {
         long id = roomService.createRoom(roomDTO);
         return new ResponseEntity<>(id, HttpStatus.OK);
