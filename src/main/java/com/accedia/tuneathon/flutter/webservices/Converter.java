@@ -14,6 +14,7 @@ public class Converter {
         dto.setId(room.getId());
         dto.setMaxPeople(room.getMaxPeople());
         dto.setStatus(room.getStatus());
+        dto.setName(room.getName());
         for (User user: room.getUserList()) {
             dto.getUserList().add(userEntityToDTO(user));
         }

@@ -28,8 +28,14 @@ public class RoomController {
     }
 
     @RequestMapping(value = "/create", method = RequestMethod.POST)
-    public ResponseEntity<Long> createRoom(@RequestBody RoomDTO roomDTO) {
-        long id = roomService.createRoom(roomDTO);
+    public ResponseEntity<Long> createRoom(@RequestBody RoomDTO roomDTO, @RequestParam long userId) {
+        long id = roomService.createRoom(roomDTO, userId);
         return new ResponseEntity<>(id, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/join", method = RequestMethod.POST)
+    public ResponseEntity<IllegalStateException> joinRoom(@RequestParam long roomId, @RequestParam long userId) {
+        roomService.joinRoom(roomId, userId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
