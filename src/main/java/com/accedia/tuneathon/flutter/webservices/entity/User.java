@@ -14,6 +14,9 @@ public class User {
     @Column
     private String name;
 
+    @Column
+    private int score;
+
     @ManyToOne
     @JoinColumn(name = "room_id")
     private Room room;
@@ -40,5 +43,13 @@ public class User {
 
     public void setRoom(Room room) {
         this.room = room;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
     }
 }

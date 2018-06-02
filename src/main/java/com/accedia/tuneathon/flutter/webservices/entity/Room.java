@@ -28,6 +28,9 @@ public class Room {
     private int answeredPeople;
 
     @Column
+    private int round;
+
+    @Column
     private String name;
 
     @Column
@@ -99,4 +102,17 @@ public class Room {
     public void setAnsweredPeople(int answeredPeople) {
         this.answeredPeople = answeredPeople;
     }
+
+    public int getRound() {
+        return round;
+    }
+
+    public void setRound(int round) {
+        this.round = round;
+    }
+
+    public boolean doAllPeopleRespond() {
+        return this.answeredPeople == this.maxPeople;
+    }
+
 }

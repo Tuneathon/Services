@@ -54,7 +54,7 @@ public class RoomService {
         return room.getId();
     }
 
-    public void joinRoom(long roomId, long userId) {
+    public RoomDTO joinRoom(long roomId, long userId) {
         Optional<Room> roomOpt = this.roomRepository.findById(roomId);
         if (!roomOpt.isPresent()) {
             throw new IllegalArgumentException("The room doesn't exist or is deleted by the host!");
@@ -75,5 +75,7 @@ public class RoomService {
         }
         this.roomRepository.save(room);
         this.userRepository.save(user);
+
+        return Converter.roomEntityToDTO(room);
     }
 }

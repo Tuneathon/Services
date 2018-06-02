@@ -1,5 +1,8 @@
 package com.accedia.tuneathon.flutter.webservices.dto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SocketResponse {
 
     private String question;
@@ -8,9 +11,11 @@ public class SocketResponse {
 
     private String message;
 
+    private List<UserDTO> users;
+
 
     public SocketResponse() {
-
+        this.users = new ArrayList<>();
     }
 
     public String getQuestion() {
@@ -35,5 +40,13 @@ public class SocketResponse {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public List<UserDTO> getUsers() {
+        return users;
+    }
+
+    public void setUsers(List<UserDTO> users) {
+        this.users = users;
     }
 }
