@@ -25,6 +25,9 @@ public class Room {
     private int currentPeople;
 
     @Column
+    private int answeredPeople;
+
+    @Column
     private String name;
 
     @Column
@@ -87,5 +90,13 @@ public class Room {
 
     public void setUserList(List<User> userList) {
         this.userList = userList;
+    }
+
+    public int getAnsweredPeople() {
+        return answeredPeople;
+    }
+
+    public void setAnsweredPeople(int answeredPeople) {
+        this.answeredPeople = answeredPeople;
     }
 }

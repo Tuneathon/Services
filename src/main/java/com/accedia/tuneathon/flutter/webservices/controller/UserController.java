@@ -24,6 +24,6 @@ public class UserController {
     @RequestMapping(value = "/create", method = RequestMethod.POST)
     public ResponseEntity<Long> createUser(@RequestBody UserDTO userDTO) {
         long id = userService.createUser(userDTO);
-        return new ResponseEntity<>(id, HttpStatus.OK);
+        return new ResponseEntity<Long>(id, HttpStatus.OK);
     }
 }
