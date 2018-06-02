@@ -1,7 +1,9 @@
-package com.accedia.tuneathon.flutter.webservices;
+package com.accedia.tuneathon.flutter.webservices.Util;
 
+import com.accedia.tuneathon.flutter.webservices.dto.QuestionDTO;
 import com.accedia.tuneathon.flutter.webservices.dto.RoomDTO;
 import com.accedia.tuneathon.flutter.webservices.dto.UserDTO;
+import com.accedia.tuneathon.flutter.webservices.entity.Question;
 import com.accedia.tuneathon.flutter.webservices.entity.Room;
 import com.accedia.tuneathon.flutter.webservices.entity.User;
 
@@ -25,6 +27,14 @@ public class Converter {
         UserDTO dto = new UserDTO();
         dto.setId(user.getId());
         dto.setName(user.getName());
+        return dto;
+    }
+
+    public static QuestionDTO questionEntityToDTO(Question question) {
+        QuestionDTO dto = new QuestionDTO();
+        dto.setId(question.getId());
+        dto.setQuestion(question.getQuestion());
+        dto.setAnswer(question.getAnswer());
         return dto;
     }
 }

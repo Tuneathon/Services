@@ -1,11 +1,14 @@
 package com.accedia.tuneathon.flutter.webservices.service;
 
-import com.accedia.tuneathon.flutter.webservices.Converter;
+import com.accedia.tuneathon.flutter.webservices.Util.Cache;
+import com.accedia.tuneathon.flutter.webservices.Util.Converter;
 import com.accedia.tuneathon.flutter.webservices.Util.RoomStatus;
 import com.accedia.tuneathon.flutter.webservices.dto.SocketRequest;
 import com.accedia.tuneathon.flutter.webservices.dto.SocketResponse;
+import com.accedia.tuneathon.flutter.webservices.entity.Question;
 import com.accedia.tuneathon.flutter.webservices.entity.Room;
 import com.accedia.tuneathon.flutter.webservices.entity.User;
+import com.accedia.tuneathon.flutter.webservices.repository.QuestionRepository;
 import com.accedia.tuneathon.flutter.webservices.repository.RoomRepository;
 import com.accedia.tuneathon.flutter.webservices.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +29,11 @@ public class TriviaService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private QuestionRepository questionRepository;
+
 
     public void onMessage(long roomId, long userId, SocketRequest request) {
-
         System.out.println("MESSAGE IS --   " + request.getAnswer() + "             ROOM ID " + roomId);
 
         Room room = this.roomRepository.findById(roomId).get();
@@ -39,18 +44,22 @@ public class TriviaService {
             if (room.getStatus().equals(RoomStatus.CLOSED)) {
                 template.convertAndSend("/topic/" + roomId, genereateMessageResponse("All players have joined. Round 1 start !"));
                 waitSeconds(3);
-                template.convertAndSend("/topic/" + roomId, genereateQuestionResponse());
+                template.convertAndSend("/topic/" + roomId, genereateQuestionResponse(roomId, room.getRound()));
             }
             return;
         }
 
         if (room.getStatus().equals(RoomStatus.CLOSED)) {
             room.setAnsweredPeople(room.getAnsweredPeople() + 1);
-            if (false) {
+            Question question = questionRepository.findById(request.getQuestionId()).get();
+            if (question.isCorrect(request.getAnswer())) {
                 user.setScore(user.getScore() + 10);
                 userRepository.save(user);
+                template.convertAndSend("/topic/" + roomId, genereateMessageResponse("Player " + user.getName() + " answered correct !", room.getUserList()));
+            } else {
+                template.convertAndSend("/topic/" + roomId, genereateMessageResponse("Player " + user.getName() + " answered wrong !"));
             }
-            template.convertAndSend("/topic/" + roomId, genereateMessageResponse("Player " + user.getName() + " answered !", room.getUserList()));
+
             if (room.doAllPeopleRespond()) {
                 if (room.getRound() == 10) {
                     template.convertAndSend("/topic/" + roomId, genereateMessageResponse("The game end !"));
@@ -60,11 +69,13 @@ public class TriviaService {
                     room.setRound(room.getRound() + 1);
                     template.convertAndSend("/topic/" + roomId, genereateMessageResponse("Round " + room.getRound() + " start !"));
                     waitSeconds(3);
-                    template.convertAndSend("/topic/" + roomId, genereateQuestionResponse());
+                    template.convertAndSend("/topic/" + roomId, genereateQuestionResponse(roomId, room.getRound()));
                 }
             }
             roomRepository.save(room);
         }
+
+
     }
 
     private void waitSeconds(int seconds) {
@@ -89,8 +100,11 @@ public class TriviaService {
         return response;
     }
 
-    private SocketResponse genereateQuestionResponse() {
-        return null;
+    private SocketResponse genereateQuestionResponse(long roomId, int round) {
+        SocketResponse response = new SocketResponse();
+        Question question = Cache.getRoomsQuestions().get(roomId).get(round);
+        response.setQuestion(question.getQuestion());
+        response.setQuestionId(question.getId());
+        return response;
     }
-
 }
