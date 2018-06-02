@@ -16,6 +16,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TriviaService {
@@ -34,17 +35,31 @@ public class TriviaService {
 
 
     public void onMessage(long roomId, long userId, SocketRequest request) {
-        System.out.println("MESSAGE IS --   " + request.getAnswer() + "             ROOM ID " + roomId);
+        System.out.println("------------------------ RECEIVE NEW MESSAGE --------------------------");
+        System.out.println("ROOM ID " + roomId);
+        System.out.println("USER ID " + userId);
+        System.out.println("REQUEST " + request);
 
-        Room room = this.roomRepository.findById(roomId).get();
-        User user = userRepository.findById(userId).get();
-
+        Optional<Room> roomOpt = this.roomRepository.findById(roomId);
+        if (!roomOpt.isPresent()) {
+            throw new IllegalArgumentException("The room doesn't exist !");
+        }
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (!userOpt.isPresent()) {
+            throw new IllegalArgumentException("The user doesn't exist !");
+        }
+        Room room = roomOpt.get();
+        User user = userOpt.get();
+        SocketResponse response;
         if (request.isJoinReq()) {
-            template.convertAndSend("/topic/" + roomId, genereateMessageResponse("User " + user.getName() + " has joined the room !", room.getUserList()));
+            response = genereateMessageResponse("User " + user.getName() + " has joined the room !", room.getUserList());
+            sendMessageToRoom(roomId, response);
             if (room.getStatus().equals(RoomStatus.CLOSED)) {
-                template.convertAndSend("/topic/" + roomId, genereateMessageResponse("All players have joined. Round 1 start !"));
+                response = genereateMessageResponse("All players have joined. Round 1 start !");
+                sendMessageToRoom(roomId, response);
                 waitSeconds(3);
-                template.convertAndSend("/topic/" + roomId, genereateQuestionResponse(roomId, room.getRound()));
+                response = genereateQuestionResponse(roomId, room.getRound());
+                sendMessageToRoom(roomId, response);
             }
             return;
         }
@@ -55,21 +70,26 @@ public class TriviaService {
             if (question.isCorrect(request.getAnswer())) {
                 user.setScore(user.getScore() + 10);
                 userRepository.save(user);
-                template.convertAndSend("/topic/" + roomId, genereateMessageResponse("Player " + user.getName() + " answered correct !", room.getUserList()));
+                response = genereateMessageResponse("Player " + user.getName() + " answered correct !", room.getUserList());
+                sendMessageToRoom(roomId, response);
             } else {
-                template.convertAndSend("/topic/" + roomId, genereateMessageResponse("Player " + user.getName() + " answered wrong !"));
+                response = genereateMessageResponse("Player " + user.getName() + " answered wrong !");
+                sendMessageToRoom(roomId, response);
             }
 
             if (room.doAllPeopleRespond()) {
                 if (room.getRound() == 10) {
-                    template.convertAndSend("/topic/" + roomId, genereateMessageResponse("The game end !"));
+                    response = genereateMessageResponse("The game end !");
+                    sendMessageToRoom(roomId, response);
                     roomRepository.delete(room);
                 } else {
                     room.setAnsweredPeople(0);
                     room.setRound(room.getRound() + 1);
-                    template.convertAndSend("/topic/" + roomId, genereateMessageResponse("Round " + room.getRound() + " start !"));
+                    response = genereateMessageResponse("Round " + room.getRound() + " start !");
+                    sendMessageToRoom(roomId, response);
                     waitSeconds(3);
-                    template.convertAndSend("/topic/" + roomId, genereateQuestionResponse(roomId, room.getRound()));
+                    response = genereateQuestionResponse(roomId, room.getRound());
+                    sendMessageToRoom(roomId, response);
                 }
             }
             roomRepository.save(room);
@@ -84,6 +104,12 @@ public class TriviaService {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    private void sendMessageToRoom(long roomId, SocketResponse response) {
+        System.out.println("SEND RESPONSE " + response);
+        template.convertAndSend("/topic/" + roomId, response);
+
     }
 
     private SocketResponse genereateMessageResponse(String message, List<User> users) {

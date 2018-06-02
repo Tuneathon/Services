@@ -14,9 +14,8 @@ public class TriviaController {
     private TriviaService triviaService;
 
     @MessageMapping("/room/{roomId}/user/{userId}")
-    public void greet(@DestinationVariable long roomId, @DestinationVariable long userId,
+    public void greet(@DestinationVariable String roomId, @DestinationVariable String userId,
                       SocketRequest message)  {
-
-        triviaService.onMessage(roomId, userId, message);
+        triviaService.onMessage(Long.valueOf(roomId), Long.valueOf(userId), message);
     }
 }

@@ -49,4 +49,15 @@ public class SocketResponse {
     public void setUsers(List<UserDTO> users) {
         this.users = users;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("SocketResponse{");
+        sb.append("question='").append(question).append('\'');
+        sb.append(", questionId=").append(questionId);
+        sb.append(", message='").append(message).append('\'');
+        sb.append(", users=").append(users);
+        sb.append('}');
+        return sb.toString();
+    }
 }
