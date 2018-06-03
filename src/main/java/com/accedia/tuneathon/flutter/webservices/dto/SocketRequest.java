@@ -2,11 +2,15 @@ package com.accedia.tuneathon.flutter.webservices.dto;
 
 public class SocketRequest {
 
-    private boolean isJoinReq;
+    private boolean joinReq;
 
     private String answer;
 
     private long questionId;
+
+    private long userId;
+
+    private long roomId;
 
 
     public SocketRequest() {
@@ -14,11 +18,11 @@ public class SocketRequest {
     }
 
     public boolean isJoinReq() {
-        return isJoinReq;
+        return joinReq;
     }
 
     public void setJoinReq(boolean joinReq) {
-        isJoinReq = joinReq;
+        this.joinReq = joinReq;
     }
 
     public String getAnswer() {
@@ -37,10 +41,27 @@ public class SocketRequest {
         this.questionId = questionId;
     }
 
+    public long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(long userId) {
+        this.userId = userId;
+    }
+
+
+    public long getRoomId() {
+        return roomId;
+    }
+
+    public void setRoomId(long roomId) {
+        this.roomId = roomId;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("SocketRequest{");
-        sb.append("isJoinReq=").append(isJoinReq);
+        sb.append("isJoinReq=").append(joinReq);
         sb.append(", answer='").append(answer).append('\'');
         sb.append(", questionId=").append(questionId);
         sb.append('}');

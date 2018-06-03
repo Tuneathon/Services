@@ -17,16 +17,16 @@ public class Room {
     private RoomStatus status;
 
     @Column
-    private int maxPeople;
+    private Integer maxPeople;
 
     @Column
-    private int currentPeople;
+    private Integer currentPeople;
 
     @Column
-    private int answeredPeople;
+    private Integer answeredPeople;
 
     @Column
-    private int round;
+    private Integer round;
 
     @Column
     private String name;
@@ -34,7 +34,7 @@ public class Room {
     @Column
     private String hostName;
 
-    @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "room", fetch = FetchType.EAGER)
     private List<User> userList;
 
     public Room(){}
@@ -55,19 +55,19 @@ public class Room {
         this.status = status;
     }
 
-    public int getMaxPeople() {
+    public Integer getMaxPeople() {
         return maxPeople;
     }
 
-    public void setMaxPeople(int maxPeople) {
+    public void setMaxPeople(Integer maxPeople) {
         this.maxPeople = maxPeople;
     }
 
-    public int getCurrentPeople() {
+    public Integer getCurrentPeople() {
         return currentPeople;
     }
 
-    public void setCurrentPeople(int currentPeople) {
+    public void setCurrentPeople(Integer currentPeople) {
         this.currentPeople = currentPeople;
     }
 
@@ -95,19 +95,19 @@ public class Room {
         this.userList = userList;
     }
 
-    public int getAnsweredPeople() {
+    public Integer getAnsweredPeople() {
         return answeredPeople;
     }
 
-    public void setAnsweredPeople(int answeredPeople) {
+    public void setAnsweredPeople(Integer answeredPeople) {
         this.answeredPeople = answeredPeople;
     }
 
-    public int getRound() {
+    public Integer getRound() {
         return round;
     }
 
-    public void setRound(int round) {
+    public void setRound(Integer round) {
         this.round = round;
     }
 

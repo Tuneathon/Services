@@ -3,6 +3,7 @@ package com.accedia.tuneathon.flutter.webservices.service;
 import com.accedia.tuneathon.flutter.webservices.Util.Cache;
 import com.accedia.tuneathon.flutter.webservices.Util.Converter;
 import com.accedia.tuneathon.flutter.webservices.Util.RoomStatus;
+import com.accedia.tuneathon.flutter.webservices.Util.SocketStorage;
 import com.accedia.tuneathon.flutter.webservices.dto.SocketRequest;
 import com.accedia.tuneathon.flutter.webservices.dto.SocketResponse;
 import com.accedia.tuneathon.flutter.webservices.entity.Question;
@@ -11,17 +12,21 @@ import com.accedia.tuneathon.flutter.webservices.entity.User;
 import com.accedia.tuneathon.flutter.webservices.repository.QuestionRepository;
 import com.accedia.tuneathon.flutter.webservices.repository.RoomRepository;
 import com.accedia.tuneathon.flutter.webservices.repository.UserRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class TriviaService {
 
-    @Autowired
+   // @Autowired
     private SimpMessagingTemplate template;
 
     @Autowired
@@ -32,6 +37,13 @@ public class TriviaService {
 
     @Autowired
     private QuestionRepository questionRepository;
+
+
+    private ObjectMapper mapper;
+
+    public TriviaService() {
+        this.mapper = new ObjectMapper();
+    }
 
 
     public void onMessage(long roomId, long userId, SocketRequest request) {
@@ -108,7 +120,16 @@ public class TriviaService {
 
     private void sendMessageToRoom(long roomId, SocketResponse response) {
         System.out.println("SEND RESPONSE " + response);
-        template.convertAndSend("/topic/" + roomId, response);
+        List<WebSocketSession> sessions = SocketStorage.getInstance().getSocketsForRoomId(roomId);
+        for (WebSocketSession session : sessions) {
+            try {
+                String payload = mapper.writeValueAsString(response);
+                session.sendMessage(new TextMessage(payload));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+       // template.convertAndSend("/topic/" + roomId, response);
 
     }
 
