@@ -1,6 +1,7 @@
 package com.accedia.tuneathon.flutter.webservices.controller;
 
 import com.accedia.tuneathon.flutter.webservices.dto.RoomDTO;
+import com.accedia.tuneathon.flutter.webservices.entity.Question;
 import com.accedia.tuneathon.flutter.webservices.service.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,5 +37,11 @@ public class RoomController {
     public ResponseEntity<RoomDTO> joinRoom(@RequestParam long roomId, @RequestParam long userId) {
         RoomDTO dto = roomService.joinRoom(roomId, userId);
         return new ResponseEntity<>(dto, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/getQuestions", method = RequestMethod.GET)
+    public ResponseEntity<List<Question>> getQuestions(@RequestParam long roomId) {
+        List<Question> questions = roomService.getQuestions(roomId);
+        return new ResponseEntity<>(questions, HttpStatus.OK);
     }
 }
