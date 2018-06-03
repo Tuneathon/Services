@@ -13,10 +13,7 @@ import com.accedia.tuneathon.flutter.webservices.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class RoomService {
@@ -29,6 +26,8 @@ public class RoomService {
 
     @Autowired
     private QuestionRepository questionRepository;
+
+    private Map<Long, Room> roomCache = new HashMap<>();
 
     public List<RoomDTO> getOpenedRooms() {
         List<Room> rooms = this.roomRepository.findByStatus(RoomStatus.OPEN);
@@ -84,6 +83,32 @@ public class RoomService {
         this.roomRepository.save(room);
         this.userRepository.save(user);
 
+        roomCache.put(roomId, room);
+
         return Converter.roomEntityToDTO(room);
+    }
+
+    public List<Question> getQuestions(long roomId) {
+        Optional<Room> roomOpt;
+        Room room;
+        do {
+            if (roomCache.get(roomId) != null) {
+                room = roomCache.get(roomId);
+            } else {
+                roomOpt = this.roomRepository.findById(roomId);
+                if (!roomOpt.isPresent()) {
+                    throw new IllegalArgumentException("The room doesn't exist or is closed by the host!");
+                }
+                room = roomOpt.get();
+                roomCache.put(roomId, room);
+            }
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } while(!room.getStatus().equals(RoomStatus.CLOSED));
+        roomCache.remove(roomId);
+        return Cache.getRoomsQuestions().get(roomId);
     }
 }
