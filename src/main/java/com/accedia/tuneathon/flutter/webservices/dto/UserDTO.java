@@ -1,12 +1,13 @@
 package com.accedia.tuneathon.flutter.webservices.dto;
 
-import com.accedia.tuneathon.flutter.webservices.entity.Room;
 
 public class UserDTO {
 
     private long id;
 
     private String name;
+
+    private int score;
 
     public long getId() {
         return id;
@@ -22,5 +23,13 @@ public class UserDTO {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
     }
 }

@@ -34,7 +34,7 @@ public class Room {
     @Column
     private String hostName;
 
-    @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "room")
     private List<User> userList;
 
     public Room(){}

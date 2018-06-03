@@ -1,6 +1,8 @@
 package com.accedia.tuneathon.flutter.webservices.controller;
 
 import com.accedia.tuneathon.flutter.webservices.dto.RoomDTO;
+import com.accedia.tuneathon.flutter.webservices.dto.SocketRequest;
+import com.accedia.tuneathon.flutter.webservices.dto.UserDTO;
 import com.accedia.tuneathon.flutter.webservices.entity.Question;
 import com.accedia.tuneathon.flutter.webservices.service.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,5 +45,17 @@ public class RoomController {
     public ResponseEntity<List<Question>> getQuestions(@RequestParam long roomId) {
         List<Question> questions = roomService.getQuestions(roomId);
         return new ResponseEntity<>(questions, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/sendAnswer", method = RequestMethod.POST)
+    public ResponseEntity<Long> sendAnswer (@RequestParam long roomId, @RequestParam long userId, @RequestBody SocketRequest request) {
+        roomService.sendAnswer(roomId, userId, request);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/getUsersScores", method = RequestMethod.GET)
+    public ResponseEntity<List<UserDTO>> getUsersScores(@RequestParam long roomId) {
+        List<UserDTO> users = roomService.getUsersScores(roomId);
+        return new ResponseEntity<>(users, HttpStatus.OK);
     }
 }

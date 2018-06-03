@@ -27,6 +27,7 @@ public class Converter {
         UserDTO dto = new UserDTO();
         dto.setId(user.getId());
         dto.setName(user.getName());
+        dto.setScore(user.getScore());
         return dto;
     }
 
