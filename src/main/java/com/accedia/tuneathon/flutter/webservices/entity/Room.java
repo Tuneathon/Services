@@ -35,9 +35,14 @@ public class Room {
     private String hostName;
 
     @OneToMany(mappedBy = "room", fetch = FetchType.EAGER)
+    @OrderBy("score DESC")
     private List<User> userList;
 
-    public Room(){}
+    public Room(){
+        this.currentPeople = 0;
+        this.round = 1;
+        this.answeredPeople = 0;
+    }
 
     public long getId() {
         return id;
@@ -112,7 +117,7 @@ public class Room {
     }
 
     public boolean doAllPeopleRespond() {
-        return this.answeredPeople == this.maxPeople;
+        return this.answeredPeople == this.currentPeople;
     }
 
 }

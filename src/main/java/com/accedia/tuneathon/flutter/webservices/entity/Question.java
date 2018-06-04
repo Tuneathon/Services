@@ -44,4 +44,14 @@ public class Question {
     public boolean isCorrect(String answer) {
         return answer.equalsIgnoreCase(this.answer);
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Question{");
+        sb.append("id=").append(id);
+        sb.append(", question='").append(question).append('\'');
+        sb.append(", answer='").append(answer).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 }

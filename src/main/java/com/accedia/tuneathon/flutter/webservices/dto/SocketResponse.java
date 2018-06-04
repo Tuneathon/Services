@@ -11,6 +11,8 @@ public class SocketResponse {
 
     private String message;
 
+    private int respCode;
+
     private List<UserDTO> users;
 
 
@@ -50,12 +52,21 @@ public class SocketResponse {
         this.users = users;
     }
 
+    public int getRespCode() {
+        return respCode;
+    }
+
+    public void setRespCode(int respCode) {
+        this.respCode = respCode;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("SocketResponse{");
         sb.append("question='").append(question).append('\'');
         sb.append(", questionId=").append(questionId);
         sb.append(", message='").append(message).append('\'');
+        sb.append(", respCode=").append(respCode);
         sb.append(", users=").append(users);
         sb.append('}');
         return sb.toString();

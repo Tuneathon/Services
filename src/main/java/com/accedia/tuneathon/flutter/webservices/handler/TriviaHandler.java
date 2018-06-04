@@ -45,7 +45,8 @@ public class TriviaHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        SocketStorage.getInstance().removeSocket(session);
+        triviaService.handleSessionDisconect(session);
 
     }
+
 }

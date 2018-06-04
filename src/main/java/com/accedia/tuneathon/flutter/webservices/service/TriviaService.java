@@ -26,7 +26,7 @@ import java.util.Optional;
 @Service
 public class TriviaService {
 
-   // @Autowired
+    // @Autowired
     private SimpMessagingTemplate template;
 
     @Autowired
@@ -64,12 +64,14 @@ public class TriviaService {
         User user = userOpt.get();
         SocketResponse response;
         if (request.isJoinReq()) {
+            user.setScore(0);
+            userRepository.save(user);
             response = genereateMessageResponse("User " + user.getName() + " has joined the room !", room.getUserList());
             sendMessageToRoom(roomId, response);
             if (room.getStatus().equals(RoomStatus.CLOSED)) {
-                response = genereateMessageResponse("All players have joined. Round 1 start !");
+                response = genereateMessageResponse("All players have joined. Round " + room.getRound() + "/3 start !");
                 sendMessageToRoom(roomId, response);
-                waitSeconds(3);
+                waitSeconds(1);
                 response = genereateQuestionResponse(roomId, room.getRound());
                 sendMessageToRoom(roomId, response);
             }
@@ -79,6 +81,8 @@ public class TriviaService {
         if (room.getStatus().equals(RoomStatus.CLOSED)) {
             room.setAnsweredPeople(room.getAnsweredPeople() + 1);
             Question question = questionRepository.findById(request.getQuestionId()).get();
+
+            System.out.println("QUESTION " + question);
             if (question.isCorrect(request.getAnswer())) {
                 user.setScore(user.getScore() + 10);
                 userRepository.save(user);
@@ -88,26 +92,63 @@ public class TriviaService {
                 response = genereateMessageResponse("Player " + user.getName() + " answered wrong !");
                 sendMessageToRoom(roomId, response);
             }
+            waitSeconds(1);
 
             if (room.doAllPeopleRespond()) {
-                if (room.getRound() == 10) {
-                    response = genereateMessageResponse("The game end !");
+                if (room.getRound() >= 3) {
+                    List<User> users = room.getUserList();
+                    String winner = "";
+                    if (users != null && !users.isEmpty()) {
+                        winner = "\nThe winner is " + users.get(0).getName() + " with " + users.get(0).getScore() + " scores !";
+                    }
+                    response = genereateMessageResponse("The game end !" + winner, room.getUserList());
                     sendMessageToRoom(roomId, response);
-                    roomRepository.delete(room);
+                    List<WebSocketSession> sockets = SocketStorage.getInstance().getSocketsForRoomId(roomId);
+                    for (WebSocketSession socket: sockets) {
+                        handleSessionDisconect(socket);
+                    }
                 } else {
                     room.setAnsweredPeople(0);
                     room.setRound(room.getRound() + 1);
-                    response = genereateMessageResponse("Round " + room.getRound() + " start !");
+                    response = genereateMessageResponse("Round " + room.getRound() + "/3 start !");
                     sendMessageToRoom(roomId, response);
-                    waitSeconds(3);
+                    waitSeconds(1);
                     response = genereateQuestionResponse(roomId, room.getRound());
                     sendMessageToRoom(roomId, response);
                 }
             }
             roomRepository.save(room);
         }
+    }
 
 
+    public void handleSessionDisconect(WebSocketSession session) {
+        SocketStorage.getInstance().removeSocket(session);
+        long roomID = SocketStorage.getInstance().getRoomIdFromUri(session.getUri());
+        decreaseRoomPeople(roomID);
+    }
+
+    public void decreaseRoomPeople(long roomId) {
+        Optional<Room> roomOpt = roomRepository.findById(roomId);
+        if (roomOpt.isPresent()) {
+            Room room = roomOpt.get();
+            if (room.getCurrentPeople() > 0) {
+                room.setCurrentPeople(room.getCurrentPeople() - 1);
+                if (room.getCurrentPeople() == 0) {
+                    List<User> users = room.getUserList();
+                    if (users != null) {
+                        for (User user : users) {
+                            user.setRoom(null);
+                            userRepository.save(user);
+                        }
+                    }
+
+                    roomRepository.delete(room);
+                } else {
+                    roomRepository.save(room);
+                }
+            }
+        }
     }
 
     private void waitSeconds(int seconds) {
@@ -129,13 +170,13 @@ public class TriviaService {
                 e.printStackTrace();
             }
         }
-       // template.convertAndSend("/topic/" + roomId, response);
+        // template.convertAndSend("/topic/" + roomId, response);
 
     }
 
     private SocketResponse genereateMessageResponse(String message, List<User> users) {
         SocketResponse response = genereateMessageResponse(message);
-        for (User user: users) {
+        for (User user : users) {
             response.getUsers().add(Converter.userEntityToDTO(user));
         }
         return response;

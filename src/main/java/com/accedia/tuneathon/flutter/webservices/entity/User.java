@@ -19,7 +19,9 @@ public class User {
     @JoinColumn(name = "room_id")
     private Room room;
 
-    public User() {}
+    public User() {
+        this.score = 0;
+    }
 
     public long getId() {
         return id;

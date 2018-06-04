@@ -23,7 +23,7 @@ public class UserController {
 
     @RequestMapping(value = "/create", method = RequestMethod.POST)
     public ResponseEntity<Long> createUser(@RequestBody UserDTO userDTO) {
-        long id = userService.createUser(userDTO);
+        long id = userService.loginUser(userDTO);
         return new ResponseEntity<Long>(id, HttpStatus.OK);
     }
 }

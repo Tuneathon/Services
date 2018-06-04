@@ -4,10 +4,10 @@ import org.springframework.web.socket.WebSocketSession;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class SocketStorage {
 
@@ -29,7 +29,7 @@ public class SocketStorage {
         return instance;
     }
 
-    private Long getRoomIdFromUri(URI uri) {
+    public Long getRoomIdFromUri(URI uri) {
         String id = uri.getQuery().split("roomId=")[1].split("&")[0];
         return Long.valueOf(id);
     }
@@ -40,7 +40,7 @@ public class SocketStorage {
             List<WebSocketSession> sockets = socketCache.get(id);
             sockets.add(socket);
         } else {
-            List<WebSocketSession> sockets = new ArrayList<>();
+            List<WebSocketSession> sockets = Collections.synchronizedList(new ArrayList<WebSocketSession>());
             sockets.add(socket);
             socketCache.put(id, sockets);
         }
